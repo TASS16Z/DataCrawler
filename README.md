@@ -6,4 +6,7 @@
  
 ## Setting up
  - update neo4j connection in src/main/resources/application.conf file
- - execute `sbt run` command.
+ 
+## Running
+ - execute `sbt run` command in repository root directory.
+ 
