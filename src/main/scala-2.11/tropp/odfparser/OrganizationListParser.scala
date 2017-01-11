@@ -46,6 +46,7 @@ class OrganizationListParser(fileContents: Array[Byte]) {
         )
       }
       .takeWhile(_.krs.trim.nonEmpty)
+      .filter(_.krs forall Character.isDigit)
   }
 
   def close(): Unit = {
