@@ -6,10 +6,10 @@ package tropp.model
   * @param krs          NR KRS
   * @param nip          NR NIP
   * @param name         NAZWA
-  * @param voivodship   WOJEWÓDZTWO
+  * @param voivodeship  WOJEWÓDZTWO
   * @param district     POWIAT
   * @param commune      GMINA
   * @param city         MIEJSCOWOŚĆ
   */
 case class OrganizationBasicInfo(krs: String, nip: Option[String], name: String,
-                                 voivodship: String, district: String, commune: String, city: String)
+                                 voivodeship: String, district: String, commune: String, city: String)

@@ -1,3 +1,3 @@
 package tropp.model
 
-case class City(id: String, name: String, commune: String, voivodship: String)
+case class City(name: String, district: String, voivodeship: String)
