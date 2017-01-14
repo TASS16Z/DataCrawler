@@ -52,13 +52,16 @@ class OrganizationBasicInfoWriter {
           else
             row.district
         }
+        val district = District(districtName, voivodeshipName)
 
-        val district = District(districtName, row.voivodeship)
-        val city = City(row.city, row.city, row.voivodeship)
+        val cityName = {
+          row.city.replace("M.", "").replace("ST.", "").trim
+        }
+        val city = City(cityName, districtName, voivodeshipName)
 
         // FixMe: Random data hack
         val opp = OPP(row.krs, row.name, Random.nextInt(100), Random.nextInt(100), Random.nextInt(10), Random.nextInt(10),
-          row.city, districtName, voivodeshipName)
+          cityName, districtName, voivodeshipName)
 
         ParsedRows(
           current.voivodeships + voivodeship,
