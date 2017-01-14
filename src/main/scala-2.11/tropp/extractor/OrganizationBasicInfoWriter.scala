@@ -57,7 +57,7 @@ class OrganizationBasicInfoWriter {
         val city = City(row.city, row.city, row.voivodeship)
 
         // FixMe: Random data hack
-        val opp = OPP(row.krs, row.name, Random.nextInt(), Random.nextInt(), Random.nextInt(), Random.nextInt(),
+        val opp = OPP(row.krs, row.name, Random.nextInt(100), Random.nextInt(100), Random.nextInt(10), Random.nextInt(10),
           row.city, districtName, voivodeshipName)
 
         ParsedRows(
