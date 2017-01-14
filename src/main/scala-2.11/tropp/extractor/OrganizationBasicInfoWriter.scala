@@ -3,6 +3,8 @@ package tropp.extractor
 import tropp.database.Neo4jClient
 import tropp.model._
 
+import scala.util.Random
+
 class OrganizationBasicInfoWriter {
 
   val neo4jClient = new Neo4jClient
@@ -29,6 +31,10 @@ class OrganizationBasicInfoWriter {
     "Zielona Góra"
   ).map(_.toLowerCase())
 
+  val voivodeshipsFixes = Map(
+    "MAŁOPOLSKA" -> "MAŁOPOLSKIE"
+  )
+
   def saveBasicData(rowStream: Stream[OrganizationBasicInfo]): Unit = {
     case class ParsedRows(voivodeships: Set[Voivodeship] = Set.empty,
                           districts: Set[District] = Set.empty,
@@ -37,17 +43,22 @@ class OrganizationBasicInfoWriter {
 
     val parsedBasicData: ParsedRows = rowStream
       .foldLeft(ParsedRows()) { case (current: ParsedRows, row: OrganizationBasicInfo) =>
-        val voivodeship = Voivodeship(row.voivodeship)
+        val voivodeshipName = voivodeshipsFixes.getOrElse(row.voivodeship, row.voivodeship)
+        val voivodeship = Voivodeship(voivodeshipName)
 
-        val district = {
+        val districtName = {
           if(singletonCities.contains(row.city.toLowerCase))
-            District(row.city, row.voivodeship)
+            row.city
           else
-            District(row.district, row.voivodeship)
+            row.district
         }
 
+        val district = District(districtName, row.voivodeship)
         val city = City(row.city, row.city, row.voivodeship)
-        val opp = OPP(row.krs, row.name, 129, 239, 291, 192, row.city, row.district, row.voivodeship)
+
+        // FixMe: Random data hack
+        val opp = OPP(row.krs, row.name, Random.nextInt(), Random.nextInt(), Random.nextInt(), Random.nextInt(),
+          row.city, districtName, voivodeshipName)
 
         ParsedRows(
           current.voivodeships + voivodeship,
@@ -58,7 +69,7 @@ class OrganizationBasicInfoWriter {
       }
 
 
-      println("Saving voivodships")
+      println("Saving voivodeships")
       neo4jClient.saveVoivodeships(parsedBasicData.voivodeships)
 
       println("Saving counties")
