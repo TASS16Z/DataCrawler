@@ -48,7 +48,7 @@ class OrganizationBasicInfoWriter {
 
         val districtName = {
           if(singletonCities.contains(row.city.toLowerCase))
-            row.city
+            row.city.replace("M.", "").replace("ST.", "").trim
           else
             row.district
         }
