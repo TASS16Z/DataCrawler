@@ -1,6 +1,6 @@
 package tropp
 
-import tropp.crawler.OrganizationListCrawler
+import tropp.crawler.{FormAndAreaCrawler, OrganizationListCrawler}
 import tropp.extractor.OrganizationBasicInfoWriter
 import tropp.odfparser.OrganizationListParser
 
@@ -17,16 +17,18 @@ object Boot extends App {
 
   System.setProperty("jna.library.path", System.getenv("GS_PATH"))
 
+  val (areas, forms) = FormAndAreaCrawler.run(120.seconds)
+
   val writer = new OrganizationBasicInfoWriter
 
-  val rawOrganizationsListOdf = OrganizationListCrawler.run(30.seconds)
+  val rawOrganizationsListOdf = OrganizationListCrawler.run(120.seconds)
   val organizationsList = {
     val parser = new OrganizationListParser(rawOrganizationsListOdf)
-    val basicData = parser.rowsStream.take(10)
+    val basicData = parser.rowsStream.take(25)
     parser.close()
     basicData
   }
 
-  writer.saveBasicData(organizationsList)
+  writer.save(organizationsList, areas, forms)
   writer.close()
 }

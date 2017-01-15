@@ -20,7 +20,7 @@ libraryDependencies ++= {
     "org.bytedeco.javacpp-presets" % "tesseract-platform" % "3.04.01-1.3",
 
     // PDF -> JPG converter
-//    "org.apache.pdfbox" % "pdfbox" % "2.0.4",
+    //    "org.apache.pdfbox" % "pdfbox" % "2.0.4",
     "org.ghost4j" % "ghost4j" % "1.0.1"
   )
 }

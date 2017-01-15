@@ -14,20 +14,29 @@ class Neo4jClient {
     Neo4jREST(Neo4jConfig.host, Neo4jConfig.port, Neo4jConfig.user, Neo4jConfig.password)
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
+  def saveAreaOPP(areas: Map[String, Any]): Unit = {
+    areas foreach { case (area, _) =>
+      Cypher(s""" CREATE (a:PublicBenefitArea {name:'$area'})""").execute()
+    }
+  }
+
+  def saveFormOPP(forms: Map[String, Any]): Unit = {
+    forms foreach { case (form, _) =>
+      Cypher(s""" CREATE (a:LegalForm {name:'$form'})""").execute()
+    }
+  }
 
   def saveCities(cities: Set[City]): Unit = {
     cities.foreach { city =>
-      val r1 = Cypher(s""" CREATE (ci:City {name:'${city.name}', voivodeship: '${city.voivodeship}', district: '${city.district}'})""").execute()
-      val r2 = Cypher(s""" MATCH (co: District { name: '${city.district}', voivodeship: '${city.voivodeship}'}), (ci: City {name:'${city.name}', voivodeship: '${city.voivodeship}', district: '${city.district}'}) CREATE (ci)-[:LIES_IN]->(co)""".stripMargin).execute()
-//      println(s"WRITE CITY $city: $r1, $r2")
+      Cypher(s""" CREATE (ci:City {name:'${city.name}', voivodeship: '${city.voivodeship}', district: '${city.district}'})""").execute()
+      Cypher(s""" MATCH (co: District { name: '${city.district}', voivodeship: '${city.voivodeship}'}), (ci: City {name:'${city.name}', voivodeship: '${city.voivodeship}', district: '${city.district}'}) CREATE (ci)-[:LIES_IN]->(co)""".stripMargin).execute()
     }
   }
 
   def saveDistricts(districts: Set[District]): Unit = {
     districts.foreach { district =>
-      val r1 = Cypher(s""" CREATE (c:District {name:'${district.name}', voivodeship: '${district.voivodeship}'})""").execute()
-      val r2 = Cypher(s""" MATCH (v: Voivodeship { name: '${district.voivodeship}'}), (c: District {name:'${district.name}', voivodeship: '${district.voivodeship}'}) CREATE (c)-[:LIES_IN]->(v)""".stripMargin).execute()
-//      println(s"WRITE DISTRICT $district: $r1, $r2")
+      Cypher(s""" CREATE (c:District {name:'${district.name}', voivodeship: '${district.voivodeship}'})""").execute()
+      Cypher(s""" MATCH (v: Voivodeship { name: '${district.voivodeship}'}), (c: District {name:'${district.name}', voivodeship: '${district.voivodeship}'}) CREATE (c)-[:LIES_IN]->(v)""".stripMargin).execute()
     }
   }
 
@@ -37,6 +46,9 @@ class Neo4jClient {
         s""" CREATE (opp:OPP {name:'${opp.name}', krs: '${opp.krs}', voivodeship: '${opp.voivodeship}', district: '${opp.district}', city: '${opp.city}',
            |salaries: ${opp.salaries}, average_salary: ${opp.averageSalary}, no_of_employees: ${opp.noOfEmployees}, no_of_beneficiaries: ${opp.noOfBeneficiaries}})""".stripMargin).execute()
       Cypher(s""" MATCH (ci: City {name:'${opp.city}', voivodeship: '${opp.voivodeship}', district: '${opp.district}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (opp)-[:REGISTERED_IN]->(ci)""".stripMargin).execute()
+
+      Cypher(s""" MATCH (a:PublicBenefitArea {name:'${opp.area}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (a)-[:CATEGORY]->(opp)""".stripMargin).execute()
+      Cypher(s""" MATCH (f:LegalForm {name:'${opp.form}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (f)-[:OPERATES_AS]->(opp)""".stripMargin).execute()
 
       // M to N relation :(
       opp.people.foreach { person =>
@@ -54,8 +66,7 @@ class Neo4jClient {
 
   def saveVoivodeships(voivodeships: Set[Voivodeship]): Unit = {
     voivodeships.foreach { voivodeship =>
-      val r = Cypher(s"""create (v:Voivodeship {name:'${voivodeship.name}'})""").execute()
-//      println(s"WRITE VOIVODESHIP $voivodeship: $r")
+      Cypher(s"""create (v:Voivodeship {name:'${voivodeship.name}'})""").execute()
     }
   }
 

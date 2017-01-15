@@ -53,7 +53,7 @@ class OrganizationBasicInfoWriter {
     tmp
   }
 
-  def saveBasicData(rowStream: Stream[OrganizationBasicInfo]): Unit = {
+  def save(rowStream: Stream[OrganizationBasicInfo], areas: Map[String, Seq[String]], forms: Map[String, Seq[String]]): Unit = {
     case class ParsedRows(voivodeships: Set[Voivodeship] = Set.empty,
                           districts: Set[District] = Set.empty,
                           cities: Set[City] = Set.empty,
@@ -78,7 +78,6 @@ class OrganizationBasicInfoWriter {
           row.city.replace("M.", "").replace("ST.", "").trim
         }
         val city = City(cityName, districtName, voivodeshipName)
-
 
         val details: Option[OCROPPDetails] = DocumentCrawler.runForOrganization(row.krs, 1.minute) map { pdfDocumentRaw: Array[Byte] =>
           val odsTempFile: File = {
@@ -111,9 +110,12 @@ class OrganizationBasicInfoWriter {
         val avgSalary: Int = details.map(_.avgSalary).getOrElse(0)
         val employeesNo: Int = details.map(_.employeesNo).getOrElse(0)
 
+        val area = areas.find { case (name, opps) => opps.contains(row.krs)} map { case (name, _) => name } getOrElse("")
+        val form = forms.find { case (name, opps) => opps.contains(row.krs)} map { case (name, _) => name } getOrElse("")
+
         // FixMe: Random data hack
         val opp = OPP(row.krs, row.name, totalSalaries, avgSalary, employeesNo, Random.nextInt(10),
-          cityName, districtName, voivodeshipName, people)
+          cityName, districtName, voivodeshipName, people, area, form)
 
         ParsedRows(
           current.voivodeships + voivodeship,
@@ -124,6 +126,11 @@ class OrganizationBasicInfoWriter {
         )
       }
 
+      println("Saving areas")
+      neo4jClient.saveAreaOPP(areas)
+
+      println("Saving forms")
+      neo4jClient.saveFormOPP(forms)
 
       println("Saving voivodeships")
       neo4jClient.saveVoivodeships(parsedBasicData.voivodeships)
@@ -140,7 +147,7 @@ class OrganizationBasicInfoWriter {
       println("Saving OPPs")
       neo4jClient.saveOPPs(parsedBasicData.opps)
 
-      println("Done saving basic data")
+      println("Done saving data")
   }
 
   def close(): Unit = {
