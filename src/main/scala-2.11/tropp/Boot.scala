@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 object Boot extends App {
 
-  System.setProperty("jna.library.path", "C:\\Program Files\\gs\\gs9.20\\bin")
+  System.setProperty("jna.library.path", System.getenv("GS_PATH"))
 
   val writer = new OrganizationBasicInfoWriter
 
