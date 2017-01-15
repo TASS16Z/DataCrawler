@@ -10,7 +10,7 @@ import org.ghost4j.renderer.SimpleRenderer
 import tropp.crawler.DocumentCrawler
 import tropp.database.Neo4jClient
 import tropp.model._
-import tropp.pdfExtractor.DocumentParser
+import tropp.pdfExtractor.{DocumentParser, OCROPPDetails}
 
 import scala.concurrent.duration._
 import scala.util.Random
@@ -80,7 +80,7 @@ class OrganizationBasicInfoWriter {
         val city = City(cityName, districtName, voivodeshipName)
 
 
-        val details: Option[List[String]] = DocumentCrawler.runForOrganization(row.krs, 1.minute) map { pdfDocumentRaw: Array[Byte] =>
+        val details: Option[OCROPPDetails] = DocumentCrawler.runForOrganization(row.krs, 1.minute) map { pdfDocumentRaw: Array[Byte] =>
           val odsTempFile: File = {
             val file = File.createTempFile("tropp-ods-", "-spreadsheet.ods")
             file.deleteOnExit()
@@ -106,12 +106,14 @@ class OrganizationBasicInfoWriter {
           documentParser.readDocumentForOrganization(tempDirectory.toString + s"/pdf-", images.size())
         }
 
-        val people: List[String] = details.getOrElse(List.empty[String])
+        val people: List[String] = details.map(_.people).getOrElse(List.empty[String])
+        val totalSalaries: Int = details.map(_.totalSalaries).getOrElse(0)
+        val avgSalary: Int = details.map(_.avgSalary).getOrElse(0)
+        val employeesNo: Int = details.map(_.employeesNo).getOrElse(0)
 
         // FixMe: Random data hack
-        val opp = OPP(row.krs, row.name, Random.nextInt(100), Random.nextInt(100), Random.nextInt(10), Random.nextInt(10),
+        val opp = OPP(row.krs, row.name, totalSalaries, avgSalary, employeesNo, Random.nextInt(10),
           cityName, districtName, voivodeshipName, people)
-
 
         ParsedRows(
           current.voivodeships + voivodeship,
