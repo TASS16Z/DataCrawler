@@ -24,7 +24,7 @@ object Boot extends App {
   val rawOrganizationsListOdf = OrganizationListCrawler.run(120.seconds)
   val organizationsList = {
     val parser = new OrganizationListParser(rawOrganizationsListOdf)
-    val basicData = parser.rowsStream.take(25)
+    val basicData = parser.rowsStream
     parser.close()
     basicData
   }

@@ -47,8 +47,13 @@ class Neo4jClient {
            |salaries: ${opp.salaries}, average_salary: ${opp.averageSalary}, no_of_employees: ${opp.noOfEmployees}, no_of_beneficiaries: ${opp.noOfBeneficiaries}})""".stripMargin).execute()
       Cypher(s""" MATCH (ci: City {name:'${opp.city}', voivodeship: '${opp.voivodeship}', district: '${opp.district}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (opp)-[:REGISTERED_IN]->(ci)""".stripMargin).execute()
 
-      Cypher(s""" MATCH (a:PublicBenefitArea {name:'${opp.area}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (a)-[:CATEGORY]->(opp)""".stripMargin).execute()
-      Cypher(s""" MATCH (f:LegalForm {name:'${opp.form}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (f)-[:OPERATES_AS]->(opp)""".stripMargin).execute()
+      opp.areas foreach { area =>
+        Cypher(s""" MATCH (a:PublicBenefitArea {name:'${area}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (opp)-[:CATEGORY]->(a)""".stripMargin).execute()
+      }
+
+      opp.forms foreach { form =>
+        Cypher(s""" MATCH (f:LegalForm {name:'${form}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (opp)-[:OPERATES_AS]->(f)""".stripMargin).execute()
+      }
 
       // M to N relation :(
       opp.people.foreach { person =>

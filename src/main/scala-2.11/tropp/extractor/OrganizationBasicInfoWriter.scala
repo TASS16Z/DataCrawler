@@ -110,8 +110,13 @@ class OrganizationBasicInfoWriter {
         val avgSalary: Int = details.map(_.avgSalary).getOrElse(0)
         val employeesNo: Int = details.map(_.employeesNo).getOrElse(0)
 
-        val area = areas.find { case (name, opps) => opps.contains(row.krs)} map { case (name, _) => name } getOrElse("")
-        val form = forms.find { case (name, opps) => opps.contains(row.krs)} map { case (name, _) => name } getOrElse("")
+//        val people: List[String] = (1 to 3).map { _ => Random.nextString(4) + " " + Random.nextString(4) }.toList
+//        val totalSalaries: Int = 0
+//        val avgSalary: Int = 0
+//        val employeesNo: Int = 0
+
+        val area = areas.filter { case (name, opps) => opps.contains(row.krs)} map { case (name, _) => name } toSet
+        val form = forms.filter { case (name, opps) => opps.contains(row.krs)} map { case (name, _) => name } toSet
 
         // FixMe: Random data hack
         val opp = OPP(row.krs, row.name, totalSalaries, avgSalary, employeesNo, Random.nextInt(10),
