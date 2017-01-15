@@ -12,4 +12,9 @@ object CrawlerConfig {
 
   val baseUrl: String = crawlerConfig.getString("baseUrl")
   val entryPointUrl: String = crawlerConfig.getString("entryPointUrl")
+
+  val oppBaseUrl: String = crawlerConfig.getString("oppBaseUrl")
+  val oppDetailsUrl: String = crawlerConfig.getString("oppDetailsUrl")
+  val oppPdfPrefix: String = crawlerConfig.getString("oppPdfPrefix")
+  val oppPdfSufix: String = crawlerConfig.getString("oppPdfSufix")
 }

@@ -19,7 +19,7 @@ class Neo4jClient {
     cities.foreach { city =>
       val r1 = Cypher(s""" CREATE (ci:City {name:'${city.name}', voivodeship: '${city.voivodeship}', district: '${city.district}'})""").execute()
       val r2 = Cypher(s""" MATCH (co: District { name: '${city.district}', voivodeship: '${city.voivodeship}'}), (ci: City {name:'${city.name}', voivodeship: '${city.voivodeship}', district: '${city.district}'}) CREATE (ci)-[:LIES_IN]->(co)""".stripMargin).execute()
-      println(s"WRITE CITY $city: $r1, $r2")
+//      println(s"WRITE CITY $city: $r1, $r2")
     }
   }
 
@@ -27,24 +27,35 @@ class Neo4jClient {
     districts.foreach { district =>
       val r1 = Cypher(s""" CREATE (c:District {name:'${district.name}', voivodeship: '${district.voivodeship}'})""").execute()
       val r2 = Cypher(s""" MATCH (v: Voivodeship { name: '${district.voivodeship}'}), (c: District {name:'${district.name}', voivodeship: '${district.voivodeship}'}) CREATE (c)-[:LIES_IN]->(v)""".stripMargin).execute()
-      println(s"WRITE DISTRICT $district: $r1, $r2")
+//      println(s"WRITE DISTRICT $district: $r1, $r2")
     }
   }
 
   def saveOPPs(opps: Set[OPP]): Unit = {
     opps.foreach { opp =>
-      val r1 = Cypher(
+      Cypher(
         s""" CREATE (opp:OPP {name:'${opp.name}', krs: '${opp.krs}', voivodeship: '${opp.voivodeship}', district: '${opp.district}', city: '${opp.city}',
            |salaries: ${opp.salaries}, average_salary: ${opp.averageSalary}, no_of_employees: ${opp.noOfEmployees}, no_of_beneficiaries: ${opp.noOfBeneficiaries}})""".stripMargin).execute()
-      val r2 = Cypher(s""" MATCH (ci: City {name:'${opp.city}', voivodeship: '${opp.voivodeship}', district: '${opp.district}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (opp)-[:REGISTERED_IN]->(ci)""".stripMargin).execute()
-      println(s"WRITE OPP $opp: $r1, $r2")
+      Cypher(s""" MATCH (ci: City {name:'${opp.city}', voivodeship: '${opp.voivodeship}', district: '${opp.district}'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (opp)-[:REGISTERED_IN]->(ci)""".stripMargin).execute()
+
+      // M to N relation :(
+      opp.people.foreach { person =>
+        Cypher(s""" MATCH (p:Person {name:'$person'}), (opp: OPP {krs: '${opp.krs}'}) CREATE (p)-[:MANAGES]->(opp)""".stripMargin).execute()
+      }
+    }
+  }
+
+  def savePeople(people: Set[Person]): Unit = {
+    people.foreach { person =>
+      Cypher(
+        s""" CREATE (p:Person {name:'${person.name}'})""".stripMargin).execute()
     }
   }
 
   def saveVoivodeships(voivodeships: Set[Voivodeship]): Unit = {
     voivodeships.foreach { voivodeship =>
       val r = Cypher(s"""create (v:Voivodeship {name:'${voivodeship.name}'})""").execute()
-      println(s"WRITE VOIVODESHIP $voivodeship: $r")
+//      println(s"WRITE VOIVODESHIP $voivodeship: $r")
     }
   }
 

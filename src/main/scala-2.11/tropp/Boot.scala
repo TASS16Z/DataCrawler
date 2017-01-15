@@ -15,12 +15,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 object Boot extends App {
 
+  System.setProperty("jna.library.path", "C:\\Program Files\\gs\\gs9.20\\bin")
+
   val writer = new OrganizationBasicInfoWriter
 
   val rawOrganizationsListOdf = OrganizationListCrawler.run(30.seconds)
   val organizationsList = {
     val parser = new OrganizationListParser(rawOrganizationsListOdf)
-    val basicData = parser.rowsStream
+    val basicData = parser.rowsStream.take(3)
     parser.close()
     basicData
   }
