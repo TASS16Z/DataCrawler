@@ -14,12 +14,18 @@ object DocumentCrawler {
       val responseBodyFuture = http.run(request).map(_.body)
       val responseBody = Await.result(responseBodyFuture, awaitAtMost)
 
-      val pdfUrlPattern = s"""a href="${CrawlerConfig.oppPdfPrefix}([0-9]+)\\${CrawlerConfig.oppPdfSufix}" """.r
+      val pdfUrlPattern = s"""a href="(${CrawlerConfig.oppPdfPrefix}[0-9]+\\${CrawlerConfig.oppPdfSuffix})" """.r
+      val pdfAlternativeUrlPattern = s"""a href="(${CrawlerConfig.oppPdfPrefix}[0-9]+\\${CrawlerConfig.oppPdfAlternativeSuffix})" """.r
 
       val documentId = pdfUrlPattern.findFirstMatchIn(responseBody)
-        .map(_.group(1))
+        .map(_.group(1)) match {
+          case Some(u) =>
+            Some(u)
+          case None =>
+            pdfAlternativeUrlPattern.findFirstMatchIn(responseBody).map(_.group(1))
+        }
 
-      val url = documentId.map(id => CrawlerConfig.oppBaseUrl + CrawlerConfig.oppPdfPrefix + id + CrawlerConfig.oppPdfSufix)
+      val url = documentId.map(id => CrawlerConfig.oppBaseUrl + id)
       url.map { url =>
         val documentFileFuture = http.run(Gigahorse.url(url))
           .map(_.bodyAsBytes)

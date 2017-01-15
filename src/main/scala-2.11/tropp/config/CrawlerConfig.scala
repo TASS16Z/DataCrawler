@@ -16,5 +16,6 @@ object CrawlerConfig {
   val oppBaseUrl: String = crawlerConfig.getString("oppBaseUrl")
   val oppDetailsUrl: String = crawlerConfig.getString("oppDetailsUrl")
   val oppPdfPrefix: String = crawlerConfig.getString("oppPdfPrefix")
-  val oppPdfSufix: String = crawlerConfig.getString("oppPdfSufix")
+  val oppPdfSuffix: String = crawlerConfig.getString("oppPdfSuffix")
+  val oppPdfAlternativeSuffix: String = crawlerConfig.getString("oppPdfAlternativeSuffix")
 }
