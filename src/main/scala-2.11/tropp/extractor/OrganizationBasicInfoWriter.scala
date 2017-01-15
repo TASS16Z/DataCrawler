@@ -70,7 +70,7 @@ class OrganizationBasicInfoWriter {
           if(singletonCities.contains(row.city.toLowerCase))
             row.city.replace("M.", "").replace("ST.", "").trim
           else
-            row.district
+            row.district.replace("M.", "").replace("ST.", "").trim
         }
         val district = District(districtName, voivodeshipName)
 
